@@ -1,0 +1,25 @@
+{
+    "themes": [
+        {
+            "theme": "Window Button Types",
+            "constants": [
+                {
+                    "name": "Window close button",
+                    "value": "0:L"
+                },
+                {
+                    "name": "Window minimize button",
+                    "value": "1:L"
+                },
+                {
+                    "name": "Window zoom button",
+                    "value": "2:L"
+                },
+                {
+                    "name": "Window document modified",
+                    "value": "3:L"
+                }
+            ]
+        }
+    ]
+}

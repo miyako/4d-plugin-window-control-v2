@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<xliff version="1.0" xmlns:d4="http://www.4d.com/d4-ns">
+    <header>
+        <note>Window Control</note>
+    </header>
+    <group resname="themes">
+        <trans-unit id="" resname="1A839DDE424E442EBF16AAA66C0A08E5" translate="no">
+            <source>Window Button Types</source>
+        </trans-unit>
+    </group>
+    <group restype="x-4DK#" d4:groupName="1A839DDE424E442EBF16AAA66C0A08E5">
+        <trans-unit d4:value="0:L" id="1A839DDE424E442EBF16AAA66C0A08E5.1">
+            <source>Window close button</source>
+        </trans-unit>
+        <trans-unit d4:value="1:L" id="1A839DDE424E442EBF16AAA66C0A08E5.2">
+            <source>Window minimize button</source>
+        </trans-unit>
+        <trans-unit d4:value="2:L" id="1A839DDE424E442EBF16AAA66C0A08E5.3">
+            <source>Window zoom button</source>
+        </trans-unit>
+        <trans-unit d4:value="3:L" id="1A839DDE424E442EBF16AAA66C0A08E5.4">
+            <source>Window document modified</source>
+        </trans-unit>
+    </group>
+</xliff>
