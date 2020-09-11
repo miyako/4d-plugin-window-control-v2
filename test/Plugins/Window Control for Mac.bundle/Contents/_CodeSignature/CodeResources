@@ -13,9 +13,20 @@
 			<key>optional</key>
 			<true/>
 		</dict>
+		<key>Resources/constants.xlf</key>
+		<data>
+		06VNWVuZPD0mUHu5HrwY48SEc8E=
+		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>QuickLook/Thumbnail.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			nGfrvibB5KlzvZgF4Bra+l0HpRloxismgTLePnOwCdk=
+			</data>
+		</dict>
 		<key>Resources/English.lproj/InfoPlist.strings</key>
 		<dict>
 			<key>hash2</key>
@@ -24,6 +35,27 @@
 			</data>
 			<key>optional</key>
 			<true/>
+		</dict>
+		<key>Resources/constants.xlf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			NedaIzlTVumMUvpdWzEgTNdToFGTqj1eX5phSFiokwI=
+			</data>
+		</dict>
+		<key>Windows/Window Control.4DX</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZCCEqtPmUM+2iJDxTvuZrd5mchV7dH5Z4RZvNF7YQT0=
+			</data>
+		</dict>
+		<key>Windows64/Window Control.4DX</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			xZ0isPdvytfz/ISMhvmTet0RKxwRCg6HeDepN7N2icI=
+			</data>
 		</dict>
 		<key>manifest.json</key>
 		<dict>
