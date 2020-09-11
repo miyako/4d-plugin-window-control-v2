@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
                BuildableName = "Window Control.bundle"
-               BlueprintName = "Window Control"
-               ReferencedContainer = "container:Window Control.xcodeproj">
+               BlueprintName = "Window Control for Mac"
+               ReferencedContainer = "container:Window Control for Mac.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,8 +29,6 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Deployment"
@@ -47,12 +45,10 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
             BuildableName = "Window Control.bundle"
-            BlueprintName = "Window Control"
-            ReferencedContainer = "container:Window Control.xcodeproj">
+            BlueprintName = "Window Control for Mac"
+            ReferencedContainer = "container:Window Control for Mac.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Deployment"
@@ -65,8 +61,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
             BuildableName = "Window Control.bundle"
-            BlueprintName = "Window Control"
-            ReferencedContainer = "container:Window Control.xcodeproj">
+            BlueprintName = "Window Control for Mac"
+            ReferencedContainer = "container:Window Control for Mac.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
