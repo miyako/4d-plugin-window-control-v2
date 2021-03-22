@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
-               BuildableName = "Window Control.bundle"
+               BuildableName = "Window Control for Mac.bundle"
                BlueprintName = "Window Control for Mac"
                ReferencedContainer = "container:Window Control for Mac.xcodeproj">
             </BuildableReference>
@@ -44,7 +44,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
-            BuildableName = "Window Control.bundle"
+            BuildableName = "Window Control for Mac.bundle"
             BlueprintName = "Window Control for Mac"
             ReferencedContainer = "container:Window Control for Mac.xcodeproj">
          </BuildableReference>
@@ -60,7 +60,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
-            BuildableName = "Window Control.bundle"
+            BuildableName = "Window Control for Mac.bundle"
             BlueprintName = "Window Control for Mac"
             ReferencedContainer = "container:Window Control for Mac.xcodeproj">
          </BuildableReference>
