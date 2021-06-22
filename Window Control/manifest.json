@@ -21,6 +21,21 @@
             "theme": "Window Icon",
             "syntax": "WINDOW Get icon(&L):P",
             "threadSafe": true
+        },
+        {
+            "theme": "Window Minimizing",
+            "syntax": "WINDOW MINIATURIZE(&L)",
+            "threadSafe": true
+        },
+        {
+            "theme": "Window Minimizing",
+            "syntax": "WINDOW DEMINIATURIZE(&L)",
+            "threadSafe": true
+        },
+        {
+            "theme": "Window Minimizing",
+            "syntax": "WINDOW Is miniaturized(&L):L",
+            "threadSafe": true
         }
     ]
 }

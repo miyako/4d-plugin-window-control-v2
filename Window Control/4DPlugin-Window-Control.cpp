@@ -22,21 +22,27 @@ void PluginMain(PA_long32 selector, PA_PluginParameters params) {
             
 			case 1 :
                 PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_SET_ENABLED, params);
-//                WINDOW_SET_ENABLED(params);
 				break;
 			case 2 :
                 PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_Get_enabled, params);
-				WINDOW_Get_enabled(params);
 				break;
 			case 3 :
                 PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_SET_ICON, params);
-//                WINDOW_SET_ICON(params);
 				break;
 			case 4 :
                 PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_Get_icon, params);
-//                WINDOW_Get_icon(params);
 				break;
 
+            // --- Window Minimizing
+            case 5 :
+                PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_MINIATURIZE, params);
+                break;
+            case 6 :
+                PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_DEMINIATURIZE, params);
+                break;
+            case 7 :
+                PA_RunInMainProcess((PA_RunInMainProcessProcPtr)WINDOW_Is_miniaturized, params);
+                break;
         }
 
 	}
@@ -181,3 +187,44 @@ void WINDOW_Get_icon(PA_PluginParameters params) {
     }
 }
 
+void WINDOW_MINIATURIZE(PA_PluginParameters params) {
+
+    PA_long32 w = PA_GetLongParameter(params, 1);
+    
+    NSWindow *window = getWindow(w);
+    
+    if (window)
+    {
+        [window performMiniaturize:nil];
+    }
+    
+}
+
+void WINDOW_DEMINIATURIZE(PA_PluginParameters params) {
+
+    PA_long32 w = PA_GetLongParameter(params, 1);
+    
+    NSWindow *window = getWindow(w);
+    
+    if (window)
+    {
+        [window deminiaturize:nil];
+    }
+    
+}
+
+void WINDOW_Is_miniaturized(PA_PluginParameters params) {
+
+    PA_long32 w = PA_GetLongParameter(params, 1);
+    
+    PA_long32 isMiniaturized = 0;
+    
+    NSWindow *window = getWindow(w);
+    
+    if (window)
+    {
+        isMiniaturized = (PA_long32)[window isMiniaturized];
+    }
+    
+    PA_ReturnLong(params, isMiniaturized);
+}

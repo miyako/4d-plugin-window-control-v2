@@ -22,6 +22,10 @@ void WINDOW_Get_enabled(PA_PluginParameters params);
 void WINDOW_SET_ICON(PA_PluginParameters params);
 void WINDOW_Get_icon(PA_PluginParameters params);
 
+void WINDOW_MINIATURIZE(PA_PluginParameters params);
+void WINDOW_DEMINIATURIZE(PA_PluginParameters params);
+void WINDOW_Is_miniaturized(PA_PluginParameters params);
+
 typedef enum {
     
     Window_close_button = 0,
