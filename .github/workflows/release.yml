@@ -47,58 +47,14 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
-  build-windows:
-    name: Build Windows (x64)
-    needs: version
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.version.outputs.tag }}
-
-      - name: setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      # GitHub-hosted windows-latest ships VS2022 (v143 toolset) but not the
-      # legacy v140 toolset the project is pinned to, so we override it on
-      # the command line rather than requiring an extra VS component install.
-      #
-      # The project also hardcodes WindowsTargetPlatformVersion=8.1 in
-      # TZ.vcxproj (<PropertyGroup Label="Globals">), and the Windows 8.1 SDK
-      # is no longer installed on current windows-latest images, which fails
-      # with MSB8036 ("The Windows SDK version 8.1 was not found"). Same class
-      # of fix as the toolset override above: override it on the command line
-      # rather than editing the vcxproj (which applies to all 4
-      # Debug/Release x Win32/x64 configurations, not just the one this job
-      # builds). "10.0" lets MSBuild resolve to whatever full 10.0.xxxxx.x SDK
-      # is actually installed on the runner, rather than pinning an exact
-      # build number that may not match the image.
-      - name: build x64
-        shell: cmd
-        run: msbuild "${{ env.VCX_SOLUTION }}" /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m
-
-      - name: upload windows binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-binaries
-          path: |
-            test/Plugins/${{ env.PRODUCT_NAME }}.bundle/Contents/Windows64/${{ env.PRODUCT_NAME }}.4DX
-          if-no-files-found: error
-
   build-macos:
     name: Build macOS, package, sign, notarize & release
-    needs: [version, build-windows]
+    needs: [version]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.version.outputs.tag }}
-
-      - name: download windows binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-binaries
-          path: winbuild
 
       - name: import Developer ID certificate
         env:
@@ -141,23 +97,16 @@ jobs:
             ARCHS="arm64 x86_64" \
             ONLY_ACTIVE_ARCH=NO \
             MACOSX_DEPLOYMENT_TARGET="${{ env.MACOS_DEPLOYMENT_TARGET }}" \
-            CODE_SIGNING_ALLOWED=NO \
             build
 
       - name: verify universal binary
         run: |
           set -euo pipefail
-          BIN="test/Plugins/${{ env.PRODUCT_NAME }}.bundle/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          BUNDLE_PATH="test/Plugins/${{ env.PRODUCT_NAME }}.bundle"
+          BIN="$BUNDLE_PATH/Contents/MacOS/${{ env.PRODUCT_NAME }}"
           lipo -info "$BIN"
           lipo -info "$BIN" | grep -q "arm64" && lipo -info "$BIN" | grep -q "x86_64"
-
-      - name: merge Windows binaries into the bundle
-        run: |
-          set -euo pipefail
-          BUNDLE="test/Plugins/${{ env.PRODUCT_NAME }}.bundle"
-          mkdir -p "$BUNDLE/Contents/Windows64"
-          cp "winbuild/${{ env.PRODUCT_NAME }}.4DX" "$BUNDLE/Contents/Windows64/${{ env.PRODUCT_NAME }}.4DX"
-          echo "BUNDLE_PATH=$BUNDLE" >> "$GITHUB_ENV"
+          echo "BUNDLE_PATH=$BUNDLE_PATH" >> "$GITHUB_ENV"
 
       - name: codesign
         run: |
