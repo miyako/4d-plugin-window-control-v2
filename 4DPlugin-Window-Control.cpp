@@ -114,6 +114,8 @@ void WINDOW_Get_enabled(PA_PluginParameters params) {
     PA_long32 w = PA_GetLongParameter(params, 1);
     PA_long32 b = PA_GetLongParameter(params, 2);
     
+    PA_long32 result = 0;
+    
     NSWindow *window = getWindow(w);
     
     if (window)
@@ -121,19 +123,21 @@ void WINDOW_Get_enabled(PA_PluginParameters params) {
         switch (b)
         {
             case Window_minimize_button:
-                PA_ReturnLong(params, getButton(window, NSWindowMiniaturizeButton));
+                result = getButton(window, NSWindowMiniaturizeButton);
                 break;
             case Window_zoom_button:
-                PA_ReturnLong(params, getButton(window, NSWindowZoomButton));
+                result = getButton(window, NSWindowZoomButton);
                 break;
             case Window_close_button:
-                PA_ReturnLong(params, getButton(window, NSWindowCloseButton));
+                result = getButton(window, NSWindowCloseButton);
                 break;
             default:
-                PA_ReturnLong(params, [window isDocumentEdited]);
+                result = [window isDocumentEdited];
                 break;
         }
     }
+    
+    PA_ReturnLong(params, result);
 }
 
 void WINDOW_SET_ICON(PA_PluginParameters params) {
@@ -164,27 +168,37 @@ void WINDOW_Get_icon(PA_PluginParameters params) {
     
     NSWindow *window = getWindow(w);
     
+    NSImage *icon = nil;
+    
     if (window)
     {
         NSButton *button = [window standardWindowButton:NSWindowDocumentIconButton];
-        NSImage *icon = [button image];
-        if (icon)
-        {
-            //return picture without memory leak; avoid the use of - TIFFRepresentation
-            NSRect imageRect = NSMakeRect(0, 0, icon.size.width , icon.size.height);
-            CGImageRef image = [icon CGImageForProposedRect:(NSRect *)&imageRect context:NULL hints:NULL];
-            CFMutableDataRef data = CFDataCreateMutable(kCFAllocatorDefault, 0);
-            CGImageDestinationRef destination = CGImageDestinationCreateWithData(data, kUTTypeTIFF, 1, NULL);
-            CFMutableDictionaryRef properties = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, NULL);
-            CGImageDestinationAddImage(destination, image, properties);
-            CGImageDestinationFinalize(destination);
-            PA_Picture p = PA_CreatePicture((void *)CFDataGetBytePtr(data), CFDataGetLength(data));
-            PA_ReturnPicture(params, p);
-            CFRelease(destination);
-            CFRelease(properties);
-            CFRelease(data);
-        }
+        icon = [button image];
     }
+    
+    //return picture without memory leak; avoid the use of - TIFFRepresentation
+    CFMutableDataRef data = CFDataCreateMutable(kCFAllocatorDefault, 0);
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData(data, kUTTypeTIFF, 1, NULL);
+    
+    if (icon)
+    {
+        NSRect imageRect = NSMakeRect(0, 0, icon.size.width , icon.size.height);
+        CGImageRef image = [icon CGImageForProposedRect:(NSRect *)&imageRect context:NULL hints:NULL];
+        CFMutableDictionaryRef properties = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, NULL);
+        CGImageDestinationAddImage(destination, image, properties);
+        CFRelease(properties);
+    }
+    
+    // if there was no window or no custom icon, destination is finalized with zero
+    // images added, so 'data' stays empty and an empty picture is returned below --
+    // this keeps a PA_Return* call on every path instead of skipping it (see review).
+    CGImageDestinationFinalize(destination);
+    
+    PA_Picture p = PA_CreatePicture((void *)CFDataGetBytePtr(data), CFDataGetLength(data));
+    PA_ReturnPicture(params, p);
+    
+    CFRelease(destination);
+    CFRelease(data);
 }
 
 void WINDOW_MINIATURIZE(PA_PluginParameters params) {
