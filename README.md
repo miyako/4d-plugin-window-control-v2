@@ -7,6 +7,136 @@
 
 Controls a native macOS window's title-bar buttons, its "document edited" indicator, its proxy (represented-file) icon, and its minimized/miniaturized state, by driving Cocoa's `NSWindow` directly. Button states are read and written as `Longint`, and the icon is read and written as a `Picture`.
 
+## Manual version and release workflows
+
+There are exactly two independent Actions entries:
+
+| Entry | Built-in ref selector | Custom inputs | Effect |
+|---|---|---|---|
+| **Bump version** | Select a branch | One required `mode`: `patch` (default), `minor`, or `major` | Commits source metadata to that branch only |
+| **Build** | Select a branch or tag | None | Builds the selected immutable commit and creates a new release |
+
+Bump never creates a tag, starts Build, or dispatches another workflow. Run Build
+separately after selecting the desired bumped branch. Build can also release an
+already-versioned source commit; it does not increment its version. Neither entry
+is triggered by branch pushes, PRs, or tag pushes. No default-branch-only restriction
+is added. All checkouts use the dispatch's `github.sha`, not a moving branch name.
+
+### Source authority and preservation
+
+The committed Bump header at intake
+`c7dcedc8af73dfc03753ae4698eb8e24158afc90` explicitly coordinates
+`MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`, and source plist versions. The
+earlier marketing-only/current-fallback headers are superseded by the explicit
+coordination change `ab6b4cbe4c3458d819906615562ec4035ceee816`; that commit's
+message also confirms the contract. Its marketing-only implementation was a bug,
+not authority to preserve stale coordinated settings.
+
+The authoritative files are `Window Control for Mac.xcodeproj/project.pbxproj`
+(six assignments per version setting: target and project, each with Development,
+Deployment, and Default), `Info.plist`, and the **source**
+`English.lproj/InfoPlist.strings`. Xcode's Resources phase copies that localization
+to `Contents/Resources/English.lproj/InfoPlist.strings`. The migration does not
+increment the intake version: it repairs only six stale current-version tokens
+and the two copied-source localization tokens to the existing marketing/source
+short version, `2.2.5`. The source plist is unchanged.
+
+Source `CFBundleShortVersionString` is required. Only `CFBundleVersion` is optional;
+its original absence remains absence. Known `$(MARKETING_VERSION)`,
+`${MARKETING_VERSION}`, `$(CURRENT_PROJECT_VERSION)`, and
+`${CURRENT_PROJECT_VERSION}` references remain references. Invalid, cyclic,
+unresolved, duplicate, noncanonical or drifted metadata fails before a bump writes.
+Edits address actual value-token spans, preserving encoding/BOM, UTF-16 endian,
+individual mixed line endings, modes, quotes, and unrelated bytes. The helper also
+tests historical marketing-only/current-fallback policies: independent current/build
+metadata stays independent even when numerically equal to marketing at intake;
+those historical policies are not the live coordinated contract.
+
+Prebuilt bundle metadata (including its stale UTF-16 localization), Windows
+payload, libraries, frameworks, resources, manifests, 4D database/project/schema,
+and native configuration are not source version authority and are not rewritten.
+The actual original workflow has only a macOS native job, notwithstanding its old
+Windows-first comment and dormant `.sln`/`.vcxproj` files. No Windows build,
+artifact merge, PowerShell, CMD, i386 rejection, or runtime-dylib gate is invented.
+The dormant Windows project's Release/x64 output remains exactly
+`test/plugins/Window Control.bundle/contents/windows64/Window Control.4DX`
+with toolset `v140`; it is not an Actions output.
+
+Build retains Default configuration, `arm64 x86_64`, deployment override `10.13`,
+frameworks/dependencies/resources, signing identity lookup, strict signature
+verification, archive formats, secret **names**, and the notary/staple sequence.
+Default already sets `SYMROOT` to `test/Plugins`, but unlike Development/Deployment
+does not override `CONFIGURATION_BUILD_DIR`; the workflow explicitly pins that
+directory to `$PWD/test/Plugins` so verification uses one canonical output.
+Only generated executable/plist/copied localization/signature and target-specific
+intermediates are removed. Whole bundles, Resources, Windows payloads, dependencies,
+and Default sibling resources are never deleted. Fresh built plist/localization
+(XML, binary, or UTF-16 strings) must equal selected source; each required
+architecture must be an exact token, without an invented two-slice-only limit.
+Both notary commands must exit successfully **and** return JSON `Accepted`, and
+stapling must succeed before publication.
+
+### Guarded branch updates and create-only publication
+
+Bump requires clean exact selected HEAD and matching remote branch SHA. It creates
+one nonempty source-only single-direct-parent commit with the Copilot co-author
+trailer. The mandatory executable pre-push guard is checked initially and after
+the final remote read. It validates receive-pack's advertised old SHA, exact ref,
+literal new SHA, HEAD, parent and exactly one update, rejecting advance, rewind,
+deletion and zero-update/same-result races. Push is nonforce, with both
+`push.followTags=false` and `--no-follow-tags`, even if local annotated tags exist.
+
+Build uses one constant cross-ref publication concurrency group, with cancellation
+disabled. Before native work, authenticated, fully paginated release enumeration
+(including drafts) and exact remote tag absence must both succeed. After all
+native/sign/notary/staple gates, those checks repeat. Authentication, 404, network,
+malformed-response and later-page failures are errors, never interpreted as
+absence. Selected HEAD and unchanged source/config are checked at both stages.
+Initial preflight requires a globally clean checkout; final `check` and `publish`
+allow only the tracked generated executable, plist, copied localization and
+signature dirt. They never reset those generated bytes to fake a clean checkout.
+
+Publication performs a separate create-only tag-ref POST at selected SHA, verifies
+the advertised remote SHA, then POSTs a **new public, non-prerelease** release
+with explicit tag/name/target and empty body, followed by separate exact zip/dmg
+uploads to its newly returned ID. The original softprops configuration specified
+only tag, name and files: no prose or generated release notes are added.
+There is no combined `gh release create`, existing-release reuse, PATCH, DELETE,
+overwrite/clobber, rollback or automatic retry.
+
+**Recovery:** any failure stops the job and retains the created tag, release and
+already uploaded assets. Read the failed step's logs and inspect those objects,
+their SHA, new release ID and asset names before taking action. A failure or
+ambiguous response may already have created remote state. Do not redispatch Build
+expecting it to repair an existing version or delete/recreate anything. A maintainer
+must decide how to handle retained partial state outside this automation; a safe
+new publication uses Bump on the desired branch and a separately selected Build
+of a new version. Branch-race failures require inspecting the branch and selecting
+its current commit again, not forcing a push.
+
+### Offline verification and pinned reference provenance
+
+Run `actionlint .github/workflows/*.yml` and
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s .github/tests -v`
+(Python 3 with PyYAML). Tests use temporary local bare Git remotes, fake `gh`,
+and literal extracted workflow Bash with a closed PATH of native stubs; they do
+not perform a native build, use signing credentials, contact notarization/4D,
+dispatch Actions, or mutate production tags/releases. There are no absent-platform
+test skips or CMD adapters. Preservation fixtures read immutable intake history,
+not a mutable original-HEAD alias, and the same suite works after genuine bumps.
+
+All workflows, helpers, hooks and tests were read at these six immutable references
+and adapted to this repository's authority, counts, topology and paths:
+
+| Repository | Commit |
+|---|---|
+| `miyako/4d-plugin-native-encoding-detection` | `c42ca565857f674bde5ea6ed3435c87375eda4a7` |
+| `miyako/4d-plugin-file-information` | `19848973601acfd3a2b5070230fa40cdc7e4edb2` |
+| `miyako/4d-plugin-common-string-algorithm` | `2606a68201866ec9fcbb38b51462d79215f504ef` |
+| `miyako/4d-plugin-window-button` | `3f14facb9aaaaff0e22eeb8e07531163680c3a8a` |
+| `miyako/4d-plugin-raw-picture-data` | `8144537fdc8dcc3d0c053dfe97aff0a8c0c3a6f9` |
+| `miyako/4d-plugin-PRNG` | `522f62e1e9f388be0f3f226c1d4c39362dad2491` |
+
 ## Commands
 
 | Command | Returns | Purpose |
