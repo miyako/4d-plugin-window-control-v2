@@ -9,7 +9,7 @@ Controls a native macOS window's title-bar buttons, its "document edited" indica
 
 ## Manual version and release workflows
 
-There are exactly two independent Actions entries:
+There are exactly two independent manual release Actions entries:
 
 | Entry | Built-in ref selector | Custom inputs | Effect |
 |---|---|---|---|
@@ -21,6 +21,12 @@ separately after selecting the desired bumped branch. Build can also release an
 already-versioned source commit; it does not increment its version. Neither entry
 is triggered by branch pushes, PRs, or tag pushes. No default-branch-only restriction
 is added. All checkouts use the dispatch's `github.sha`, not a moving branch name.
+
+The separate **Ownership** workflow runs unsigned synthetic regressions on relevant
+pushes to `master` and the audit branch. It does not build the plugin, manipulate
+real windows/images, sign, package, or publish anything. See the
+[native ownership audit](.github/tests/ownership-audit.md) for source provenance,
+baseline reproduction, dormant-helper scope and remaining contract limits.
 
 ### Source authority and preservation
 

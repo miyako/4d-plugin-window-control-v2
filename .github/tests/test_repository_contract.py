@@ -85,7 +85,9 @@ class RepositoryContractTests(unittest.TestCase):
             ["git", "-C", str(ROOT), "ls-tree", "-r", BASE], text=True,
         ).splitlines()
         allowed = {*map(str, source.SOURCE_PATHS), "README.md",
-                   ".github/workflows/bump-version.yml", ".github/workflows/release.yml"}
+                   ".github/workflows/bump-version.yml", ".github/workflows/release.yml",
+                   "4D Plugin API/Classes/ARRAY_TEXT.h", "4D Plugin API/Classes/C_BLOB.h",
+                   "4D Plugin API/Classes/C_BLOB.cpp", "support/4DPlugin-JSON.cpp"}
         for line in tree:
             record, name = line.split("\t")
             if name in allowed:
@@ -97,8 +99,10 @@ class RepositoryContractTests(unittest.TestCase):
 
     def test_exactly_two_independent_manual_entries(self):
         paths = sorted((ROOT / ".github/workflows").glob("*.yml"))
-        self.assertEqual(len(paths), 2)
-        workflows = [yaml.safe_load(path.read_text()) for path in paths]
+        self.assertEqual([path.name for path in paths],
+                         ["bump-version.yml", "ownership.yml", "release.yml"])
+        manual_paths = [path for path in paths if path.name != "ownership.yml"]
+        workflows = [yaml.safe_load(path.read_text()) for path in manual_paths]
         bump, build = workflows
         self.assertEqual(bump["name"], "Bump version")
         self.assertEqual(build["name"], "Build")
@@ -119,7 +123,7 @@ class RepositoryContractTests(unittest.TestCase):
                          {"group": "release-publication", "cancel-in-progress": False})
         self.assertEqual(set(build["jobs"]), {"version", "build-macos"})
         self.assertEqual(build["jobs"]["build-macos"]["needs"], ["version"])
-        content = paths[1].read_text()
+        content = manual_paths[1].read_text()
         for absent in ("windows-latest", "pwsh", "shell: cmd", "softprops/",
                        "${{ inputs.", "github.ref_name", "refs/heads/master"):
             self.assertNotIn(absent, content)
@@ -131,6 +135,32 @@ class RepositoryContractTests(unittest.TestCase):
         ]
         self.assertEqual([content.index(f"- name: {name}\n") for name in names],
                          sorted(content.index(f"- name: {name}\n") for name in names))
+
+    def test_ownership_workflow_is_narrow_unsigned_and_read_only(self):
+        path = ROOT / ".github/workflows/ownership.yml"
+        workflow = yaml.safe_load(path.read_text())
+        self.assertEqual(set(workflow[True]), {"push"})
+        self.assertEqual(workflow[True]["push"]["branches"],
+                         ["miyako-window-control-ownership", "master"])
+        self.assertEqual(workflow[True]["push"]["paths"], [
+            "4D Plugin API/**", "4DPlugin-Window-Control.cpp", "4DPlugin-Window-Control.h",
+            "support/**", ".github/tests/**", ".github/workflows/ownership.yml",
+        ])
+        self.assertEqual(workflow["permissions"], {"contents": "read"})
+        self.assertEqual(set(workflow["jobs"]), {"ownership"})
+        job = workflow["jobs"]["ownership"]
+        self.assertEqual(job["runs-on"], "macos-latest")
+        self.assertEqual(job["steps"][0], {
+            "uses": "actions/checkout@v4", "with": {"fetch-depth": 0},
+        })
+        self.assertEqual([step["run"] for step in job["steps"][1:]], [
+            "python3 .github/tests/test_ownership.py",
+            "python3 .github/tests/test_ownership_baseline.py",
+            'python3 -m venv "$RUNNER_TEMP/ownership-venv"\n'
+            '"$RUNNER_TEMP/ownership-venv/bin/python" -m pip install '
+            '--disable-pip-version-check --no-deps PyYAML==6.0.3\n'
+            '"$RUNNER_TEMP/ownership-venv/bin/python" .github/tests/test_repository_contract.py\n',
+        ])
 
     def test_actual_native_topology_outputs_resources_and_original_notes(self):
         before = original(".github/workflows/release.yml").decode()
