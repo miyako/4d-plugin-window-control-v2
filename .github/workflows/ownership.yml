@@ -1,0 +1,39 @@
+name: Ownership
+
+on:
+  push:
+    branches:
+      - miyako-window-control-ownership
+      - master
+    paths:
+      - '4D Plugin API/**'
+      - '4DPlugin-Window-Control.cpp'
+      - '4DPlugin-Window-Control.h'
+      - 'support/**'
+      - '.github/tests/**'
+      - '.github/workflows/ownership.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ownership:
+    name: Unsigned ownership regressions
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Complete actual-source sanitizer host
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 .github/tests/test_ownership.py
+      - name: Immutable baseline defects and controls
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 .github/tests/test_ownership_baseline.py
+      - name: Repository preservation contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 .github/tests/test_repository_contract.py
