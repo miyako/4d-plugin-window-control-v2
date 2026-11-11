@@ -36,4 +36,7 @@ jobs:
       - name: Repository preservation contracts
         env:
           PYTHONDONTWRITEBYTECODE: '1'
-        run: python3 .github/tests/test_repository_contract.py
+        run: |
+          python3 -m venv "$RUNNER_TEMP/ownership-venv"
+          "$RUNNER_TEMP/ownership-venv/bin/python" -m pip install --disable-pip-version-check --no-deps PyYAML==6.0.3
+          "$RUNNER_TEMP/ownership-venv/bin/python" .github/tests/test_repository_contract.py

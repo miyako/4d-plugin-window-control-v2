@@ -156,7 +156,10 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertEqual([step["run"] for step in job["steps"][1:]], [
             "python3 .github/tests/test_ownership.py",
             "python3 .github/tests/test_ownership_baseline.py",
-            "python3 .github/tests/test_repository_contract.py",
+            'python3 -m venv "$RUNNER_TEMP/ownership-venv"\n'
+            '"$RUNNER_TEMP/ownership-venv/bin/python" -m pip install '
+            '--disable-pip-version-check --no-deps PyYAML==6.0.3\n'
+            '"$RUNNER_TEMP/ownership-venv/bin/python" .github/tests/test_repository_contract.py\n',
         ])
 
     def test_actual_native_topology_outputs_resources_and_original_notes(self):

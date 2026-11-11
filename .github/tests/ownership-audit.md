@@ -184,7 +184,7 @@ Existing workflows/scripts and project phases were read before validation.
 Build and Bump version are manual-only. Xcode Deployment signs, packages,
 notarizes/uploads; the shared launch/profile/archive actions select Deployment.
 No project build, launch, tag, release, signing, notarization, binary packaging,
-publication, manual dispatch, rerun or dependency installation is performed.
+publication, manual dispatch or rerun is performed.
 Repository metadata reports has_pages=false; Pages API returns 404; hook
 inventory is empty. No automatic existing deployment trigger was found.
 
@@ -193,6 +193,12 @@ on the exact audit branch and master. Full-history checkout supports immutable
 baseline and existing preservation checks. Only the four explicitly fixed
 native files were added to the existing preservation allowlist. SDK/ABI headers,
 manifests, projects, release workflows, version metadata and binaries are unchanged.
+
+The first CI run passed the fixed and baseline sanitizer steps but failed the
+preservation step with `ModuleNotFoundError: No module named 'yaml'`. The
+workflow now installs that existing test dependency, pinned PyYAML 6.0.3, into
+an isolated runner-temporary virtual environment. No global installation or
+application dependency change is needed; the failed run is not rerun.
 
 Harness/helper prior art was read via immutable API from
 `miyako/4d-plugin-unicode-normalize@88faf72ab80b31a07f3ba88f2baff1b75fa05640`.
